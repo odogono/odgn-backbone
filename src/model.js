@@ -1,20 +1,6 @@
-'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _underscore = require('underscore');
-
-var _underscore2 = _interopRequireDefault(_underscore);
-
-var _events = require('./events');
-
-var _events2 = _interopRequireDefault(_events);
-
-var _utils = require('./utils');
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+import _ from 'underscore';
+import Events from './events';
+import {addUnderscoreMethods, extend as BackboneExtend, wrapError} from './utils';
 
 // Backbone.Model
 // --------------
@@ -26,25 +12,25 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 // Create a new model with the specified attributes. A client id (`cid`)
 // is automatically generated and assigned for you.
-var Model = function Model(attributes, options) {
+var Model = function(attributes, options) {
   var attrs = attributes || {};
   options || (options = {});
   this.preinitialize.apply(this, arguments);
-  this.cid = _underscore2.default.uniqueId(this.cidPrefix);
+  this.cid = _.uniqueId(this.cidPrefix);
   this.attributes = {};
   if (options.collection) this.collection = options.collection;
   if (options.parse) attrs = this.parse(attrs, options) || {};
-  var defaults = _underscore2.default.result(this, 'defaults');
-  attrs = _underscore2.default.defaults(_underscore2.default.extend({}, defaults, attrs), defaults);
+  var defaults = _.result(this, 'defaults');
+  attrs = _.defaults(_.extend({}, defaults, attrs), defaults);
   this.set(attrs, options);
   this.changed = {};
   this.initialize.apply(this, arguments);
 };
 
-Model.extend = _utils.extend;
+Model.extend = BackboneExtend;
 
 // Attach all inheritable methods to the Model prototype.
-_underscore2.default.extend(Model.prototype, _events2.default, {
+_.extend(Model.prototype, Events, {
 
   // A hash of attributes whose current and previous value differ.
   changed: null,
@@ -62,48 +48,48 @@ _underscore2.default.extend(Model.prototype, _events2.default, {
 
   // preinitialize is an empty function by default. You can override it with a function
   // or object.  preinitialize will run before any instantiation logic is run in the Model.
-  preinitialize: function preinitialize() {},
+  preinitialize: function(){},
 
   // Initialize is an empty function by default. Override it with your own
   // initialization logic.
-  initialize: function initialize() {},
+  initialize: function(){},
 
   // Return a copy of the model's `attributes` object.
-  toJSON: function toJSON(options) {
-    return _underscore2.default.clone(this.attributes);
+  toJSON: function(options) {
+    return _.clone(this.attributes);
   },
 
   // Proxy `Backbone.sync` by default -- but override this if you need
   // custom syncing semantics for *this* particular model.
-  sync: function sync() {
+  sync: function() {
     return Backbone.sync.apply(this, arguments);
   },
 
   // Get the value of an attribute.
-  get: function get(attr) {
+  get: function(attr) {
     return this.attributes[attr];
   },
 
   // Get the HTML-escaped value of an attribute.
-  escape: function escape(attr) {
-    return _underscore2.default.escape(this.get(attr));
+  escape: function(attr) {
+    return _.escape(this.get(attr));
   },
 
   // Returns `true` if the attribute contains a value that is not null
   // or undefined.
-  has: function has(attr) {
+  has: function(attr) {
     return this.get(attr) != null;
   },
 
   // Special-cased proxy to underscore's `_.matches` method.
-  matches: function matches(attrs) {
-    return !!_underscore2.default.iteratee(attrs, this)(this.attributes);
+  matches: function(attrs) {
+    return !!_.iteratee(attrs, this)(this.attributes);
   },
 
   // Set a hash of model attributes on the object, firing `"change"`. This is
   // the core primitive operation of a model, updating the data and notifying
   // anyone who needs to know about the change in state. The heart of the beast.
-  set: function set(key, val, options) {
+  set: function(key, val, options) {
     if (key == null) return this;
 
     // Handle both `"key", value` and `{key: value}` -style arguments.
@@ -121,26 +107,26 @@ _underscore2.default.extend(Model.prototype, _events2.default, {
     if (!this._validate(attrs, options)) return false;
 
     // Extract attributes and options.
-    var unset = options.unset;
-    var silent = options.silent;
-    var changes = [];
-    var changing = this._changing;
+    var unset      = options.unset;
+    var silent     = options.silent;
+    var changes    = [];
+    var changing   = this._changing;
     this._changing = true;
 
     if (!changing) {
-      this._previousAttributes = _underscore2.default.clone(this.attributes);
+      this._previousAttributes = _.clone(this.attributes);
       this.changed = {};
     }
 
     var current = this.attributes;
     var changed = this.changed;
-    var prev = this._previousAttributes;
+    var prev    = this._previousAttributes;
 
     // For each `set` attribute, update or delete the current value.
     for (var attr in attrs) {
       val = attrs[attr];
-      if (!_underscore2.default.isEqual(current[attr], val)) changes.push(attr);
-      if (!_underscore2.default.isEqual(prev[attr], val)) {
+      if (!_.isEqual(current[attr], val)) changes.push(attr);
+      if (!_.isEqual(prev[attr], val)) {
         changed[attr] = val;
       } else {
         delete changed[attr];
@@ -176,22 +162,22 @@ _underscore2.default.extend(Model.prototype, _events2.default, {
 
   // Remove an attribute from the model, firing `"change"`. `unset` is a noop
   // if the attribute doesn't exist.
-  unset: function unset(attr, options) {
-    return this.set(attr, void 0, _underscore2.default.extend({}, options, { unset: true }));
+  unset: function(attr, options) {
+    return this.set(attr, void 0, _.extend({}, options, {unset: true}));
   },
 
   // Clear all attributes on the model, firing `"change"`.
-  clear: function clear(options) {
+  clear: function(options) {
     var attrs = {};
     for (var key in this.attributes) attrs[key] = void 0;
-    return this.set(attrs, _underscore2.default.extend({}, options, { unset: true }));
+    return this.set(attrs, _.extend({}, options, {unset: true}));
   },
 
   // Determine if the model has changed since the last `"change"` event.
   // If you specify an attribute name, determine if that attribute has changed.
-  hasChanged: function hasChanged(attr) {
-    if (attr == null) return !_underscore2.default.isEmpty(this.changed);
-    return _underscore2.default.has(this.changed, attr);
+  hasChanged: function(attr) {
+    if (attr == null) return !_.isEmpty(this.changed);
+    return _.has(this.changed, attr);
   },
 
   // Return an object containing all the attributes that have changed, or
@@ -200,14 +186,14 @@ _underscore2.default.extend(Model.prototype, _events2.default, {
   // persisted to the server. Unset attributes will be set to undefined.
   // You can also pass an attributes object to diff against the model,
   // determining if there *would be* a change.
-  changedAttributes: function changedAttributes(diff) {
-    if (!diff) return this.hasChanged() ? _underscore2.default.clone(this.changed) : false;
+  changedAttributes: function(diff) {
+    if (!diff) return this.hasChanged() ? _.clone(this.changed) : false;
     var old = this._changing ? this._previousAttributes : this.attributes;
     var changed = {};
     var hasChanged;
     for (var attr in diff) {
       var val = diff[attr];
-      if (_underscore2.default.isEqual(old[attr], val)) continue;
+      if (_.isEqual(old[attr], val)) continue;
       changed[attr] = val;
       hasChanged = true;
     }
@@ -216,104 +202,104 @@ _underscore2.default.extend(Model.prototype, _events2.default, {
 
   // Get the previous value of an attribute, recorded at the time the last
   // `"change"` event was fired.
-  previous: function previous(attr) {
+  previous: function(attr) {
     if (attr == null || !this._previousAttributes) return null;
     return this._previousAttributes[attr];
   },
 
   // Get all of the attributes of the model at the time of the previous
   // `"change"` event.
-  previousAttributes: function previousAttributes() {
-    return _underscore2.default.clone(this._previousAttributes);
+  previousAttributes: function() {
+    return _.clone(this._previousAttributes);
   },
 
   // Fetch the model from the server, merging the response with the model's
   // local attributes. Any changed attributes will trigger a "change" event.
   // fetch: function(options) {
   //   throw new Error('not implemented');
-  // options = _.extend({parse: true}, options);
-  // var model = this;
-  // var success = options.success;
-  // options.success = function(resp) {
-  //   var serverAttrs = options.parse ? model.parse(resp, options) : resp;
-  //   if (!model.set(serverAttrs, options)) return false;
-  //   if (success) success.call(options.context, model, resp, options);
-  //   model.trigger('sync', model, resp, options);
-  // };
-  // wrapError(this, options);
-  // return this.sync('read', this, options);
+    // options = _.extend({parse: true}, options);
+    // var model = this;
+    // var success = options.success;
+    // options.success = function(resp) {
+    //   var serverAttrs = options.parse ? model.parse(resp, options) : resp;
+    //   if (!model.set(serverAttrs, options)) return false;
+    //   if (success) success.call(options.context, model, resp, options);
+    //   model.trigger('sync', model, resp, options);
+    // };
+    // wrapError(this, options);
+    // return this.sync('read', this, options);
   // },
 
   // Set a hash of model attributes, and sync the model to the server.
   // If the server returns an attributes hash that differs, the model's
   // state will be `set` again.
   // save: function(key, val, options) {
-  // throw new Error('not implemented');
-  // // Handle both `"key", value` and `{key: value}` -style arguments.
-  // var attrs;
-  // if (key == null || typeof key === 'object') {
-  //   attrs = key;
-  //   options = val;
-  // } else {
-  //   (attrs = {})[key] = val;
-  // }
+    // throw new Error('not implemented');
+    // // Handle both `"key", value` and `{key: value}` -style arguments.
+    // var attrs;
+    // if (key == null || typeof key === 'object') {
+    //   attrs = key;
+    //   options = val;
+    // } else {
+    //   (attrs = {})[key] = val;
+    // }
 
-  // options = _.extend({validate: true, parse: true}, options);
-  // var wait = options.wait;
+    // options = _.extend({validate: true, parse: true}, options);
+    // var wait = options.wait;
 
-  // // If we're not waiting and attributes exist, save acts as
-  // // `set(attr).save(null, opts)` with validation. Otherwise, check if
-  // // the model will be valid when the attributes, if any, are set.
-  // if (attrs && !wait) {
-  //   if (!this.set(attrs, options)) return false;
-  // } else if (!this._validate(attrs, options)) {
-  //   return false;
-  // }
+    // // If we're not waiting and attributes exist, save acts as
+    // // `set(attr).save(null, opts)` with validation. Otherwise, check if
+    // // the model will be valid when the attributes, if any, are set.
+    // if (attrs && !wait) {
+    //   if (!this.set(attrs, options)) return false;
+    // } else if (!this._validate(attrs, options)) {
+    //   return false;
+    // }
 
-  // // After a successful server-side save, the client is (optionally)
-  // // updated with the server-side state.
-  // var model = this;
-  // var success = options.success;
-  // var attributes = this.attributes;
-  // options.success = function(resp) {
-  //   // Ensure attributes are restored during synchronous saves.
-  //   model.attributes = attributes;
-  //   var serverAttrs = options.parse ? model.parse(resp, options) : resp;
-  //   if (wait) serverAttrs = _.extend({}, attrs, serverAttrs);
-  //   if (serverAttrs && !model.set(serverAttrs, options)) return false;
-  //   if (success) success.call(options.context, model, resp, options);
-  //   model.trigger('sync', model, resp, options);
-  // };
-  // wrapError(this, options);
+    // // After a successful server-side save, the client is (optionally)
+    // // updated with the server-side state.
+    // var model = this;
+    // var success = options.success;
+    // var attributes = this.attributes;
+    // options.success = function(resp) {
+    //   // Ensure attributes are restored during synchronous saves.
+    //   model.attributes = attributes;
+    //   var serverAttrs = options.parse ? model.parse(resp, options) : resp;
+    //   if (wait) serverAttrs = _.extend({}, attrs, serverAttrs);
+    //   if (serverAttrs && !model.set(serverAttrs, options)) return false;
+    //   if (success) success.call(options.context, model, resp, options);
+    //   model.trigger('sync', model, resp, options);
+    // };
+    // wrapError(this, options);
 
-  // // Set temporary attributes if `{wait: true}` to properly find new ids.
-  // if (attrs && wait) this.attributes = _.extend({}, attributes, attrs);
+    // // Set temporary attributes if `{wait: true}` to properly find new ids.
+    // if (attrs && wait) this.attributes = _.extend({}, attributes, attrs);
 
-  // var method = this.isNew() ? 'create' : (options.patch ? 'patch' : 'update');
-  // if (method === 'patch' && !options.attrs) options.attrs = attrs;
-  // var xhr = this.sync(method, this, options);
+    // var method = this.isNew() ? 'create' : (options.patch ? 'patch' : 'update');
+    // if (method === 'patch' && !options.attrs) options.attrs = attrs;
+    // var xhr = this.sync(method, this, options);
 
-  // // Restore attributes.
-  // this.attributes = attributes;
+    // // Restore attributes.
+    // this.attributes = attributes;
 
-  // return xhr;
+    // return xhr;
   // },
 
   // Destroy this model on the server if it was already persisted.
   // Optimistically removes the model from its collection, if it has one.
   // If `wait: true` is passed, waits for the server to respond before removal.
-  destroy: function destroy(options) {
-    options = options ? _underscore2.default.clone(options) : {};
+  destroy: function(options) {
+    options = options ? _.clone(options) : {};
     var model = this;
     var success = options.success;
     var wait = false;
 
-    var destroy = function destroy() {
+    var destroy = function() {
       model.stopListening();
       model.trigger('destroy', model, model.collection, options);
     };
 
-    options.success = function (resp) {
+    options.success = function(resp) {
       if (wait) destroy();
       if (success) success.call(options.context, model, resp, options);
       if (!model.isNew()) model.trigger('sync', model, resp, options);
@@ -321,10 +307,10 @@ _underscore2.default.extend(Model.prototype, _events2.default, {
 
     var xhr = false;
     if (this.isNew()) {
-      _underscore2.default.defer(options.success);
+      _.defer(options.success);
     } else {
-      (0, _utils.wrapError)(this, options);
-      //   xhr = this.sync('delete', this, options);
+      wrapError(this, options);
+    //   xhr = this.sync('delete', this, options);
     }
     if (!wait) destroy();
     return xhr;
@@ -345,33 +331,33 @@ _underscore2.default.extend(Model.prototype, _events2.default, {
 
   // **parse** converts a response into the hash of attributes to be `set` on
   // the model. The default implementation is just to pass the response along.
-  parse: function parse(resp, options) {
+  parse: function(resp, options) {
     return resp;
   },
 
   // Create a new model with identical attributes to this one.
-  clone: function clone() {
+  clone: function() {
     return new this.constructor(this.attributes);
   },
 
   // A model is new if it has never been saved to the server, and lacks an id.
-  isNew: function isNew() {
+  isNew: function() {
     return !this.has(this.idAttribute);
   },
 
   // Check if the model is currently in a valid state.
-  isValid: function isValid(options) {
-    return this._validate({}, _underscore2.default.extend({}, options, { validate: true }));
+  isValid: function(options) {
+    return this._validate({}, _.extend({}, options, {validate: true}));
   },
 
   // Run validation against the next complete set of model attributes,
   // returning `true` if all is well. Otherwise, fire an `"invalid"` event.
-  _validate: function _validate(attrs, options) {
+  _validate: function(attrs, options) {
     if (!options.validate || !this.validate) return true;
-    attrs = _underscore2.default.extend({}, this.attributes, attrs);
+    attrs = _.extend({}, this.attributes, attrs);
     var error = this.validationError = this.validate(attrs, options) || null;
     if (!error) return true;
-    this.trigger('invalid', this, error, _underscore2.default.extend(options, { validationError: error }));
+    this.trigger('invalid', this, error, _.extend(options, {validationError: error}));
     return false;
   }
 
@@ -379,10 +365,10 @@ _underscore2.default.extend(Model.prototype, _events2.default, {
 
 // Underscore methods that we want to implement on the Model, mapped to the
 // number of arguments they take.
-var modelMethods = { keys: 1, values: 1, pairs: 1, invert: 1, pick: 0,
-  omit: 0, chain: 1, isEmpty: 1 };
+var modelMethods = {keys: 1, values: 1, pairs: 1, invert: 1, pick: 0,
+    omit: 0, chain: 1, isEmpty: 1};
 
 // Mix in each Underscore method as a proxy to `Model#attributes`.
-(0, _utils.addUnderscoreMethods)(Model, modelMethods, 'attributes');
+addUnderscoreMethods(Model, modelMethods, 'attributes');
 
-exports.default = Model;
+export default Model;
