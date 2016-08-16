@@ -1,6 +1,6 @@
 {
   "name": "odgn-backbone-model",
-  "version": "1.3.5",
+  "version": "1.3.6",
   "description": "A reduced version of Backbone with only Models, Collections and Events",
   "main": "lib/index.js",
   "directories": {
@@ -30,7 +30,7 @@
   "homepage": "https://github.com/odogono/odgn-backbone-model#readme",
   "devDependencies": {
     "babel-cli": "^6.11.4",
-    "babel-preset-es2015-node6": "^0.3.0",
+    "babel-preset-es2015": "^6.13.2",
     "qunit": "^0.9.1"
   },
   "dependencies": {
@@ -41,7 +41,7 @@
   },
   "babel": {
     "presets": [
-      "es2015-node6"
+      "es2015"
     ]
   }
 }
