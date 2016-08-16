@@ -11,7 +11,7 @@ import Collection from '../lib/collection'
 
   QUnit.module('Backbone.Model', {
 
-    beforeEach: function(assert) {
+    setup: function() {
       doc = new ProxyModel({
         id: '1-the-tempest',
         title: 'The Tempest',
@@ -107,41 +107,41 @@ import Collection from '../lib/collection'
     assert.equal(JSON.stringify(model.toJSON()), '{}');
   });
 
-  QUnit.test('url', function(assert) {
-    expect(3);
-    doc.urlRoot = null;
-    assert.equal(doc.url(), '/collection/1-the-tempest');
-    doc.collection.url = '/collection/';
-    assert.equal(doc.url(), '/collection/1-the-tempest');
-    doc.collection = null;
-    assert.raises(function() { doc.url(); });
-    doc.collection = collection;
-  });
+  // QUnit.test('url', function(assert) {
+  //   expect(3);
+  //   doc.urlRoot = null;
+  //   assert.equal(doc.url(), '/collection/1-the-tempest');
+  //   doc.collection.url = '/collection/';
+  //   assert.equal(doc.url(), '/collection/1-the-tempest');
+  //   doc.collection = null;
+  //   assert.raises(function() { doc.url(); });
+  //   doc.collection = collection;
+  // });
 
-  QUnit.test('url when using urlRoot, and uri encoding', function(assert) {
-    expect(2);
-    var SModel = Model.extend({
-      urlRoot: '/collection'
-    });
-    var model = new SModel();
-    assert.equal(model.url(), '/collection');
-    model.set({id: '+1+'});
-    assert.equal(model.url(), '/collection/%2B1%2B');
-  });
+  // QUnit.test('url when using urlRoot, and uri encoding', function(assert) {
+  //   expect(2);
+  //   var SModel = Model.extend({
+  //     urlRoot: '/collection'
+  //   });
+  //   var model = new SModel();
+  //   assert.equal(model.url(), '/collection');
+  //   model.set({id: '+1+'});
+  //   assert.equal(model.url(), '/collection/%2B1%2B');
+  // });
 
-  QUnit.test('url when using urlRoot as a function to determine urlRoot at runtime', function(assert) {
-    expect(2);
-    var SModel = Model.extend({
-      urlRoot: function() {
-        return '/nested/' + this.get('parentId') + '/collection';
-      }
-    });
+  // QUnit.test('url when using urlRoot as a function to determine urlRoot at runtime', function(assert) {
+  //   expect(2);
+  //   var SModel = Model.extend({
+  //     urlRoot: function() {
+  //       return '/nested/' + this.get('parentId') + '/collection';
+  //     }
+  //   });
 
-    var model = new SModel({parentId: 1});
-    assert.equal(model.url(), '/nested/1/collection');
-    model.set({id: 2});
-    assert.equal(model.url(), '/nested/1/collection/2');
-  });
+  //   var model = new SModel({parentId: 1});
+  //   assert.equal(model.url(), '/nested/1/collection');
+  //   model.set({id: 2});
+  //   assert.equal(model.url(), '/nested/1/collection/2');
+  // });
 
   QUnit.test('underscore methods', function(assert) {
     expect(5);
@@ -379,7 +379,7 @@ import Collection from '../lib/collection'
 
   QUnit.test('using a non-default id attribute.', function(assert) {
     expect(5);
-    var MongoModel = Backbone.Model.extend({idAttribute: '_id'});
+    var MongoModel = Model.extend({idAttribute: '_id'});
     var model = new MongoModel({id: 'eye-dee', _id: 25, title: 'Model'});
     assert.equal(model.get('id'), 'eye-dee');
     assert.equal(model.id, 25);
@@ -401,10 +401,10 @@ import Collection from '../lib/collection'
     model = new Model();
     assert.equal(model.cid.charAt(0), 'c');
 
-    var Collection = Backbone.Collection.extend({
-      model: Model
+    var SCollection = Collection.extend({
+      model: SModel
     });
-    var col = new Collection([{id: 'c5'}, {id: 'c6'}, {id: 'c7'}]);
+    var col = new SCollection([{id: 'c5'}, {id: 'c6'}, {id: 'c7'}]);
 
     assert.equal(col.get('c6').cid.charAt(0), 'm');
     col.set([{id: 'c6', value: 'test'}], {
@@ -454,7 +454,7 @@ import Collection from '../lib/collection'
 
   QUnit.test('defaults', function(assert) {
     expect(9);
-    var Defaulted = Backbone.Model.extend({
+    var Defaulted = Model.extend({
       defaults: {
         one: 1,
         two: 2
@@ -466,7 +466,7 @@ import Collection from '../lib/collection'
     model = new Defaulted({two: 3});
     assert.equal(model.get('one'), 1);
     assert.equal(model.get('two'), 3);
-    Defaulted = Backbone.Model.extend({
+    Defaulted = Model.extend({
       defaults: function() {
         return {
           one: 3,
@@ -477,7 +477,7 @@ import Collection from '../lib/collection'
     model = new Defaulted({two: undefined});
     assert.equal(model.get('one'), 3);
     assert.equal(model.get('two'), 4);
-    Defaulted = Backbone.Model.extend({
+    Defaulted = Model.extend({
       defaults: {hasOwnProperty: true}
     });
     model = new Defaulted();
@@ -536,248 +536,248 @@ import Collection from '../lib/collection'
     assert.equal(changed, 0);
   });
 
-  QUnit.test('save within change event', function(assert) {
-    expect(1);
-    var env = this;
-    var model = new Model({firstName: 'Taylor', lastName: 'Swift'});
-    model.url = '/test';
-    model.on('change', function() {
-      model.save();
-      assert.ok(_.isEqual(env.syncArgs.model, model));
-    });
-    model.set({lastName: 'Hicks'});
-  });
+  // QUnit.test('save within change event', function(assert) {
+  //   expect(1);
+  //   var env = this;
+  //   var model = new Model({firstName: 'Taylor', lastName: 'Swift'});
+  //   model.url = '/test';
+  //   model.on('change', function() {
+  //     model.save();
+  //     assert.ok(_.isEqual(env.syncArgs.model, model));
+  //   });
+  //   model.set({lastName: 'Hicks'});
+  // });
 
-  QUnit.test('validate after save', function(assert) {
-    expect(2);
-    var lastError, model = new Model();
-    model.validate = function(attrs) {
-      if (attrs.admin) return "Can't change admin status.";
-    };
-    model.sync = function(method, m, options) {
-      options.success.call(this, {admin: true});
-    };
-    model.on('invalid', function(m, error) {
-      lastError = error;
-    });
-    model.save(null);
+  // QUnit.test('validate after save', function(assert) {
+  //   expect(2);
+  //   var lastError, model = new Model();
+  //   model.validate = function(attrs) {
+  //     if (attrs.admin) return "Can't change admin status.";
+  //   };
+  //   model.sync = function(method, m, options) {
+  //     options.success.call(this, {admin: true});
+  //   };
+  //   model.on('invalid', function(m, error) {
+  //     lastError = error;
+  //   });
+  //   model.save(null);
 
-    assert.equal(lastError, "Can't change admin status.");
-    assert.equal(model.validationError, "Can't change admin status.");
-  });
+  //   assert.equal(lastError, "Can't change admin status.");
+  //   assert.equal(model.validationError, "Can't change admin status.");
+  // });
 
-  QUnit.test('save', function(assert) {
-    expect(2);
-    doc.save({title: 'Henry V'});
-    assert.equal(this.syncArgs.method, 'update');
-    assert.ok(_.isEqual(this.syncArgs.model, doc));
-  });
+  // QUnit.test('save', function(assert) {
+  //   expect(2);
+  //   doc.save({title: 'Henry V'});
+  //   assert.equal(this.syncArgs.method, 'update');
+  //   assert.ok(_.isEqual(this.syncArgs.model, doc));
+  // });
 
-  QUnit.test('save, fetch, destroy triggers error event when an error occurs', function(assert) {
-    expect(3);
-    var model = new Model();
-    model.on('error', function() {
-      assert.ok(true);
-    });
-    model.sync = function(method, m, options) {
-      options.error();
-    };
-    model.save({data: 2, id: 1});
-    model.fetch();
-    model.destroy();
-  });
+  // QUnit.test('save, fetch, destroy triggers error event when an error occurs', function(assert) {
+  //   expect(3);
+  //   var model = new Model();
+  //   model.on('error', function() {
+  //     assert.ok(true);
+  //   });
+  //   model.sync = function(method, m, options) {
+  //     options.error();
+  //   };
+  //   model.save({data: 2, id: 1});
+  //   model.fetch();
+  //   model.destroy();
+  // });
 
-  QUnit.test('#3283 - save, fetch, destroy calls success with context', function(assert) {
-    expect(3);
-    var model = new Model();
-    var obj = {};
-    var options = {
-      context: obj,
-      success: function() {
-        assert.equal(this, obj);
-      }
-    };
-    model.sync = function(method, m, opts) {
-      opts.success.call(opts.context);
-    };
-    model.save({data: 2, id: 1}, options);
-    model.fetch(options);
-    model.destroy(options);
-  });
+  // QUnit.test('#3283 - save, fetch, destroy calls success with context', function(assert) {
+  //   expect(3);
+  //   var model = new Model();
+  //   var obj = {};
+  //   var options = {
+  //     context: obj,
+  //     success: function() {
+  //       assert.equal(this, obj);
+  //     }
+  //   };
+  //   model.sync = function(method, m, opts) {
+  //     opts.success.call(opts.context);
+  //   };
+  //   model.save({data: 2, id: 1}, options);
+  //   model.fetch(options);
+  //   model.destroy(options);
+  // });
 
-  QUnit.test('#3283 - save, fetch, destroy calls error with context', function(assert) {
-    expect(3);
-    var model = new Model();
-    var obj = {};
-    var options = {
-      context: obj,
-      error: function() {
-        assert.equal(this, obj);
-      }
-    };
-    model.sync = function(method, m, opts) {
-      opts.error.call(opts.context);
-    };
-    model.save({data: 2, id: 1}, options);
-    model.fetch(options);
-    model.destroy(options);
-  });
+  // QUnit.test('#3283 - save, fetch, destroy calls error with context', function(assert) {
+  //   expect(3);
+  //   var model = new Model();
+  //   var obj = {};
+  //   var options = {
+  //     context: obj,
+  //     error: function() {
+  //       assert.equal(this, obj);
+  //     }
+  //   };
+  //   model.sync = function(method, m, opts) {
+  //     opts.error.call(opts.context);
+  //   };
+  //   model.save({data: 2, id: 1}, options);
+  //   model.fetch(options);
+  //   model.destroy(options);
+  // });
 
-  QUnit.test('#3470 - save and fetch with parse false', function(assert) {
-    expect(2);
-    var i = 0;
-    var model = new Model();
-    model.parse = function() {
-      assert.ok(false);
-    };
-    model.sync = function(method, m, options) {
-      options.success({i: ++i});
-    };
-    model.fetch({parse: false});
-    assert.equal(model.get('i'), i);
-    model.save(null, {parse: false});
-    assert.equal(model.get('i'), i);
-  });
+  // QUnit.test('#3470 - save and fetch with parse false', function(assert) {
+  //   expect(2);
+  //   var i = 0;
+  //   var model = new Model();
+  //   model.parse = function() {
+  //     assert.ok(false);
+  //   };
+  //   model.sync = function(method, m, options) {
+  //     options.success({i: ++i});
+  //   };
+  //   model.fetch({parse: false});
+  //   assert.equal(model.get('i'), i);
+  //   model.save(null, {parse: false});
+  //   assert.equal(model.get('i'), i);
+  // });
 
-  QUnit.test('save with PATCH', function(assert) {
-    doc.clear().set({id: 1, a: 1, b: 2, c: 3, d: 4});
-    doc.save();
-    assert.equal(this.syncArgs.method, 'update');
-    assert.equal(this.syncArgs.options.attrs, undefined);
+  // QUnit.test('save with PATCH', function(assert) {
+  //   doc.clear().set({id: 1, a: 1, b: 2, c: 3, d: 4});
+  //   doc.save();
+  //   assert.equal(this.syncArgs.method, 'update');
+  //   assert.equal(this.syncArgs.options.attrs, undefined);
 
-    doc.save({b: 2, d: 4}, {patch: true});
-    assert.equal(this.syncArgs.method, 'patch');
-    assert.equal(_.size(this.syncArgs.options.attrs), 2);
-    assert.equal(this.syncArgs.options.attrs.d, 4);
-    assert.equal(this.syncArgs.options.attrs.a, undefined);
-    assert.equal(this.ajaxSettings.data, '{"b":2,"d":4}');
-  });
+  //   doc.save({b: 2, d: 4}, {patch: true});
+  //   assert.equal(this.syncArgs.method, 'patch');
+  //   assert.equal(_.size(this.syncArgs.options.attrs), 2);
+  //   assert.equal(this.syncArgs.options.attrs.d, 4);
+  //   assert.equal(this.syncArgs.options.attrs.a, undefined);
+  //   assert.equal(this.ajaxSettings.data, '{"b":2,"d":4}');
+  // });
 
-  QUnit.test('save with PATCH and different attrs', function(assert) {
-    doc.clear().save({b: 2, d: 4}, {patch: true, attrs: {B: 1, D: 3}});
-    assert.equal(this.syncArgs.options.attrs.D, 3);
-    assert.equal(this.syncArgs.options.attrs.d, undefined);
-    assert.equal(this.ajaxSettings.data, '{"B":1,"D":3}');
-    assert.deepEqual(doc.attributes, {b: 2, d: 4});
-  });
+  // QUnit.test('save with PATCH and different attrs', function(assert) {
+  //   doc.clear().save({b: 2, d: 4}, {patch: true, attrs: {B: 1, D: 3}});
+  //   assert.equal(this.syncArgs.options.attrs.D, 3);
+  //   assert.equal(this.syncArgs.options.attrs.d, undefined);
+  //   assert.equal(this.ajaxSettings.data, '{"B":1,"D":3}');
+  //   assert.deepEqual(doc.attributes, {b: 2, d: 4});
+  // });
 
-  QUnit.test('save in positional style', function(assert) {
-    expect(1);
-    var model = new Model();
-    model.sync = function(method, m, options) {
-      options.success();
-    };
-    model.save('title', 'Twelfth Night');
-    assert.equal(model.get('title'), 'Twelfth Night');
-  });
+  // QUnit.test('save in positional style', function(assert) {
+  //   expect(1);
+  //   var model = new Model();
+  //   model.sync = function(method, m, options) {
+  //     options.success();
+  //   };
+  //   model.save('title', 'Twelfth Night');
+  //   assert.equal(model.get('title'), 'Twelfth Night');
+  // });
 
-  QUnit.test('save with non-object success response', function(assert) {
-    expect(2);
-    var model = new Model();
-    model.sync = function(method, m, options) {
-      options.success('', options);
-      options.success(null, options);
-    };
-    model.save({testing: 'empty'}, {
-      success: function(m) {
-        assert.deepEqual(m.attributes, {testing: 'empty'});
-      }
-    });
-  });
+  // QUnit.test('save with non-object success response', function(assert) {
+  //   expect(2);
+  //   var model = new Model();
+  //   model.sync = function(method, m, options) {
+  //     options.success('', options);
+  //     options.success(null, options);
+  //   };
+  //   model.save({testing: 'empty'}, {
+  //     success: function(m) {
+  //       assert.deepEqual(m.attributes, {testing: 'empty'});
+  //     }
+  //   });
+  // });
 
-  QUnit.test('save with wait and supplied id', function(assert) {
-    var SModel = Model.extend({
-      urlRoot: '/collection'
-    });
-    var model = new SModel();
-    model.save({id: 42}, {wait: true});
-    assert.equal(this.ajaxSettings.url, '/collection/42');
-  });
+  // QUnit.test('save with wait and supplied id', function(assert) {
+  //   var SModel = Model.extend({
+  //     urlRoot: '/collection'
+  //   });
+  //   var model = new SModel();
+  //   model.save({id: 42}, {wait: true});
+  //   assert.equal(this.ajaxSettings.url, '/collection/42');
+  // });
 
-  QUnit.test('save will pass extra options to success callback', function(assert) {
-    expect(1);
-    var SpecialSyncModel = Backbone.Model.extend({
-      sync: function(method, m, options) {
-        _.extend(options, {specialSync: true});
-        return Backbone.Model.prototype.sync.call(this, method, m, options);
-      },
-      urlRoot: '/test'
-    });
+  // QUnit.test('save will pass extra options to success callback', function(assert) {
+  //   expect(1);
+  //   var SpecialSyncModel = Backbone.Model.extend({
+  //     sync: function(method, m, options) {
+  //       _.extend(options, {specialSync: true});
+  //       return Backbone.Model.prototype.sync.call(this, method, m, options);
+  //     },
+  //     urlRoot: '/test'
+  //   });
 
-    var model = new SpecialSyncModel();
+  //   var model = new SpecialSyncModel();
 
-    var onSuccess = function(m, response, options) {
-      assert.ok(options.specialSync, 'Options were passed correctly to callback');
-    };
+  //   var onSuccess = function(m, response, options) {
+  //     assert.ok(options.specialSync, 'Options were passed correctly to callback');
+  //   };
 
-    model.save(null, {success: onSuccess});
-    this.ajaxSettings.success();
-  });
+  //   model.save(null, {success: onSuccess});
+  //   this.ajaxSettings.success();
+  // });
 
-  QUnit.test('fetch', function(assert) {
-    expect(2);
-    doc.fetch();
-    assert.equal(this.syncArgs.method, 'read');
-    assert.ok(_.isEqual(this.syncArgs.model, doc));
-  });
+  // QUnit.test('fetch', function(assert) {
+  //   expect(2);
+  //   doc.fetch();
+  //   assert.equal(this.syncArgs.method, 'read');
+  //   assert.ok(_.isEqual(this.syncArgs.model, doc));
+  // });
 
-  QUnit.test('fetch will pass extra options to success callback', function(assert) {
-    expect(1);
-    var SpecialSyncModel = Backbone.Model.extend({
-      sync: function(method, m, options) {
-        _.extend(options, {specialSync: true});
-        return Backbone.Model.prototype.sync.call(this, method, m, options);
-      },
-      urlRoot: '/test'
-    });
+  // QUnit.test('fetch will pass extra options to success callback', function(assert) {
+  //   expect(1);
+  //   var SpecialSyncModel = Backbone.Model.extend({
+  //     sync: function(method, m, options) {
+  //       _.extend(options, {specialSync: true});
+  //       return Backbone.Model.prototype.sync.call(this, method, m, options);
+  //     },
+  //     urlRoot: '/test'
+  //   });
 
-    var model = new SpecialSyncModel();
+  //   var model = new SpecialSyncModel();
 
-    var onSuccess = function(m, response, options) {
-      assert.ok(options.specialSync, 'Options were passed correctly to callback');
-    };
+  //   var onSuccess = function(m, response, options) {
+  //     assert.ok(options.specialSync, 'Options were passed correctly to callback');
+  //   };
 
-    model.fetch({success: onSuccess});
-    this.ajaxSettings.success();
-  });
+  //   model.fetch({success: onSuccess});
+  //   this.ajaxSettings.success();
+  // });
 
-  QUnit.test('destroy', function(assert) {
-    expect(3);
-    doc.destroy();
-    assert.equal(this.syncArgs.method, 'delete');
-    assert.ok(_.isEqual(this.syncArgs.model, doc));
+  // QUnit.test('destroy', function(assert) {
+  //   expect(3);
+  //   doc.destroy();
+  //   assert.equal(this.syncArgs.method, 'delete');
+  //   assert.ok(_.isEqual(this.syncArgs.model, doc));
 
-    var newModel = new Model;
-    assert.equal(newModel.destroy(), false);
-  });
+  //   var newModel = new Model;
+  //   assert.equal(newModel.destroy(), false);
+  // });
 
-  QUnit.test('destroy will pass extra options to success callback', function(assert) {
-    expect(1);
-    var SpecialSyncModel = Backbone.Model.extend({
-      sync: function(method, m, options) {
-        _.extend(options, {specialSync: true});
-        return Backbone.Model.prototype.sync.call(this, method, m, options);
-      },
-      urlRoot: '/test'
-    });
+  // QUnit.test('destroy will pass extra options to success callback', function(assert) {
+  //   expect(1);
+  //   var SpecialSyncModel = Backbone.Model.extend({
+  //     sync: function(method, m, options) {
+  //       _.extend(options, {specialSync: true});
+  //       return Backbone.Model.prototype.sync.call(this, method, m, options);
+  //     },
+  //     urlRoot: '/test'
+  //   });
 
-    var model = new SpecialSyncModel({id: 'id'});
+  //   var model = new SpecialSyncModel({id: 'id'});
 
-    var onSuccess = function(m, response, options) {
-      assert.ok(options.specialSync, 'Options were passed correctly to callback');
-    };
+  //   var onSuccess = function(m, response, options) {
+  //     assert.ok(options.specialSync, 'Options were passed correctly to callback');
+  //   };
 
-    model.destroy({success: onSuccess});
-    this.ajaxSettings.success();
-  });
+  //   model.destroy({success: onSuccess});
+  //   this.ajaxSettings.success();
+  // });
 
-  QUnit.test('non-persisted destroy', function(assert) {
-    expect(1);
-    var a = new Model({foo: 1, bar: 2, baz: 3});
-    a.sync = function() { throw 'should not be called'; };
-    a.destroy();
-    assert.ok(true, 'non-persisted model should not call sync');
-  });
+  // QUnit.test('non-persisted destroy', function(assert) {
+  //   expect(1);
+  //   var a = new Model({foo: 1, bar: 2, baz: 3});
+  //   a.sync = function() { throw 'should not be called'; };
+  //   a.destroy();
+  //   assert.ok(true, 'non-persisted model should not call sync');
+  // });
 
   QUnit.test('validate', function(assert) {
     var lastError;
@@ -847,7 +847,7 @@ import Collection from '../lib/collection'
 
   QUnit.test('defaults always extend attrs (#459)', function(assert) {
     expect(2);
-    var Defaulted = Backbone.Model.extend({
+    var Defaulted = Model.extend({
       defaults: {one: 1},
       initialize: function(attrs, opts) {
         assert.equal(this.attributes.one, 1);
@@ -859,7 +859,7 @@ import Collection from '../lib/collection'
 
   QUnit.test('Inherit class properties', function(assert) {
     expect(6);
-    var Parent = Backbone.Model.extend({
+    var Parent = Model.extend({
       instancePropSame: function() {},
       instancePropDiff: function() {}
     }, {
@@ -992,29 +992,29 @@ import Collection from '../lib/collection'
     assert.ok(!model.hasChanged());
   });
 
-  QUnit.test('save with `wait` succeeds without `validate`', function(assert) {
-    expect(1);
-    var model = new Model();
-    model.url = '/test';
-    model.save({x: 1}, {wait: true});
-    assert.ok(this.syncArgs.model === model);
-  });
+  // QUnit.test('save with `wait` succeeds without `validate`', function(assert) {
+  //   expect(1);
+  //   var model = new Model();
+  //   model.url = '/test';
+  //   model.save({x: 1}, {wait: true});
+  //   assert.ok(this.syncArgs.model === model);
+  // });
 
-  QUnit.test("save without `wait` doesn't set invalid attributes", function(assert) {
-    var model = new Model();
-    model.validate = function() { return 1; };
-    model.save({a: 1});
-    assert.equal(model.get('a'), void 0);
-  });
+  // QUnit.test("save without `wait` doesn't set invalid attributes", function(assert) {
+  //   var model = new Model();
+  //   model.validate = function() { return 1; };
+  //   model.save({a: 1});
+  //   assert.equal(model.get('a'), void 0);
+  // });
 
-  QUnit.test("save doesn't validate twice", function(assert) {
-    var model = new Model();
-    var times = 0;
-    model.sync = function() {};
-    model.validate = function() { ++times; };
-    model.save({});
-    assert.equal(times, 1);
-  });
+  // QUnit.test("save doesn't validate twice", function(assert) {
+  //   var model = new Model();
+  //   var times = 0;
+  //   model.sync = function() {};
+  //   model.validate = function() { ++times; };
+  //   model.save({});
+  //   assert.equal(times, 1);
+  // });
 
   QUnit.test('`hasChanged` for falsey keys', function(assert) {
     expect(2);
@@ -1032,53 +1032,53 @@ import Collection from '../lib/collection'
     assert.equal(model.previous(''), true);
   });
 
-  QUnit.test('`save` with `wait` sends correct attributes', function(assert) {
-    expect(5);
-    var changed = 0;
-    var model = new Model({x: 1, y: 2});
-    model.url = '/test';
-    model.on('change:x', function() { changed++; });
-    model.save({x: 3}, {wait: true});
-    assert.deepEqual(JSON.parse(this.ajaxSettings.data), {x: 3, y: 2});
-    assert.equal(model.get('x'), 1);
-    assert.equal(changed, 0);
-    this.syncArgs.options.success({});
-    assert.equal(model.get('x'), 3);
-    assert.equal(changed, 1);
-  });
+  // QUnit.test('`save` with `wait` sends correct attributes', function(assert) {
+  //   expect(5);
+  //   var changed = 0;
+  //   var model = new Model({x: 1, y: 2});
+  //   model.url = '/test';
+  //   model.on('change:x', function() { changed++; });
+  //   model.save({x: 3}, {wait: true});
+  //   assert.deepEqual(JSON.parse(this.ajaxSettings.data), {x: 3, y: 2});
+  //   assert.equal(model.get('x'), 1);
+  //   assert.equal(changed, 0);
+  //   this.syncArgs.options.success({});
+  //   assert.equal(model.get('x'), 3);
+  //   assert.equal(changed, 1);
+  // });
 
-  QUnit.test("a failed `save` with `wait` doesn't leave attributes behind", function(assert) {
-    expect(1);
-    var model = new Model;
-    model.url = '/test';
-    model.save({x: 1}, {wait: true});
-    assert.equal(model.get('x'), void 0);
-  });
+  // QUnit.test("a failed `save` with `wait` doesn't leave attributes behind", function(assert) {
+  //   expect(1);
+  //   var model = new Model;
+  //   model.url = '/test';
+  //   model.save({x: 1}, {wait: true});
+  //   assert.equal(model.get('x'), void 0);
+  // });
 
-  QUnit.test('#1030 - `save` with `wait` results in correct attributes if success is called during sync', function(assert) {
-    expect(2);
-    var model = new Model({x: 1, y: 2});
-    model.sync = function(method, m, options) {
-      options.success();
-    };
-    model.on('change:x', function() { assert.ok(true); });
-    model.save({x: 3}, {wait: true});
-    assert.equal(model.get('x'), 3);
-  });
+  // QUnit.test('#1030 - `save` with `wait` results in correct attributes if success is called during sync', function(assert) {
+  //   expect(2);
+  //   var model = new Model({x: 1, y: 2});
+  //   model.sync = function(method, m, options) {
+  //     options.success();
+  //   };
+  //   model.on('change:x', function() { assert.ok(true); });
+  //   model.save({x: 3}, {wait: true});
+  //   assert.equal(model.get('x'), 3);
+  // });
 
-  QUnit.test('save with wait validates attributes', function(assert) {
-    var model = new Model();
-    model.url = '/test';
-    model.validate = function() { assert.ok(true); };
-    model.save({x: 1}, {wait: true});
-  });
+  // QUnit.test('save with wait validates attributes', function(assert) {
+  //   var model = new Model();
+  //   model.url = '/test';
+  //   model.validate = function() { assert.ok(true); };
+  //   model.save({x: 1}, {wait: true});
+  // });
 
-  QUnit.test('save turns on parse flag', function(assert) {
-    var SModel = Model.extend({
-      sync: function(method, m, options) { assert.ok(options.parse); }
-    });
-    new SModel().save();
-  });
+  // QUnit.test('save turns on parse flag', function(assert) {
+  //   var SModel = Model.extend({
+  //     sync: function(method, m, options) { assert.ok(options.parse); }
+  //   });
+  //   new SModel().save();
+  // });
 
   QUnit.test("nested `set` during `'change:attr'`", function(assert) {
     expect(2);
@@ -1235,64 +1235,64 @@ import Collection from '../lib/collection'
     assert.ok(!options.unset);
   });
 
-  QUnit.test('#1355 - `options` is passed to success callbacks', function(assert) {
-    expect(3);
-    var model = new Model();
-    var opts = {
-      success: function( m, resp, options ) {
-        assert.ok(options);
-      }
-    };
-    model.sync = function(method, m, options) {
-      options.success();
-    };
-    model.save({id: 1}, opts);
-    model.fetch(opts);
-    model.destroy(opts);
-  });
+  // QUnit.test('#1355 - `options` is passed to success callbacks', function(assert) {
+  //   expect(3);
+  //   var model = new Model();
+  //   var opts = {
+  //     success: function( m, resp, options ) {
+  //       assert.ok(options);
+  //     }
+  //   };
+  //   model.sync = function(method, m, options) {
+  //     options.success();
+  //   };
+  //   model.save({id: 1}, opts);
+  //   model.fetch(opts);
+  //   model.destroy(opts);
+  // });
 
-  QUnit.test("#1412 - Trigger 'sync' event.", function(assert) {
-    expect(3);
-    var model = new Model({id: 1});
-    model.sync = function(method, m, options) { options.success(); };
-    model.on('sync', function(){ assert.ok(true); });
-    model.fetch();
-    model.save();
-    model.destroy();
-  });
+  // QUnit.test("#1412 - Trigger 'sync' event.", function(assert) {
+  //   expect(3);
+  //   var model = new Model({id: 1});
+  //   model.sync = function(method, m, options) { options.success(); };
+  //   model.on('sync', function(){ assert.ok(true); });
+  //   model.fetch();
+  //   model.save();
+  //   model.destroy();
+  // });
 
-  QUnit.test('#1365 - Destroy: New models execute success callback.', function(assert) {
-    // var done = assert.async();
-    expect(2);
-    stop();
-    new Model()
-    .on('sync', function() { assert.ok(false); })
-    .on('destroy', function(){ assert.ok(true); })
-    .destroy({success: function(){
-      assert.ok(true);
-      start();
-    }});
-  });
+  // QUnit.test('#1365 - Destroy: New models execute success callback.', function(assert) {
+  //   // var done = assert.async();
+  //   expect(2);
+  //   stop();
+  //   new Model()
+  //   .on('sync', function() { assert.ok(false); })
+  //   .on('destroy', function(){ assert.ok(true); })
+  //   .destroy({success: function(){
+  //     assert.ok(true);
+  //     start();
+  //   }});
+  // });
 
-  QUnit.test('#1433 - Save: An invalid model cannot be persisted.', function(assert) {
-    expect(1);
-    var model = new Model;
-    model.validate = function(){ return 'invalid'; };
-    model.sync = function(){ assert.ok(false); };
-    assert.strictEqual(model.save(), false);
-  });
+  // QUnit.test('#1433 - Save: An invalid model cannot be persisted.', function(assert) {
+  //   expect(1);
+  //   var model = new Model;
+  //   model.validate = function(){ return 'invalid'; };
+  //   model.sync = function(){ assert.ok(false); };
+  //   assert.strictEqual(model.save(), false);
+  // });
 
-  QUnit.test("#1377 - Save without attrs triggers 'error'.", function(assert) {
-    expect(1);
-    var SModel = Model.extend({
-      url: '/test/',
-      sync: function(method, m, options){ options.success(); },
-      validate: function(){ return 'invalid'; }
-    });
-    var model = new SModel({id: 1});
-    model.on('invalid', function(){ assert.ok(true); });
-    model.save();
-  });
+  // QUnit.test("#1377 - Save without attrs triggers 'error'.", function(assert) {
+  //   expect(1);
+  //   var SModel = Model.extend({
+  //     url: '/test/',
+  //     sync: function(method, m, options){ options.success(); },
+  //     validate: function(){ return 'invalid'; }
+  //   });
+  //   var model = new SModel({id: 1});
+  //   model.on('invalid', function(){ assert.ok(true); });
+  //   model.save();
+  // });
 
   QUnit.test('#1545 - `undefined` can be passed to a model constructor without coersion', function(assert) {
     var SModel = Model.extend({
@@ -1305,22 +1305,22 @@ import Collection from '../lib/collection'
     var undefinedattrs = new SModel(undefined);
   });
 
-  QUnit.test('#1478 - Model `save` does not trigger change on unchanged attributes', function(assert) {
-    // var done = assert.async();
-    expect(0);
-    stop();
-    var SModel = Model.extend({
-      sync: function(method, m, options) {
-        setTimeout(function(){
-          options.success();
-          start();
-        }, 0);
-      }
-    });
-    new SModel({x: true})
-    .on('change:x', function(){ assert.ok(false); })
-    .save(null, {wait: true});
-  });
+  // QUnit.test('#1478 - Model `save` does not trigger change on unchanged attributes', function(assert) {
+  //   // var done = assert.async();
+  //   expect(0);
+  //   stop();
+  //   var SModel = Model.extend({
+  //     sync: function(method, m, options) {
+  //       setTimeout(function(){
+  //         options.success();
+  //         start();
+  //       }, 0);
+  //     }
+  //   });
+  //   new SModel({x: true})
+  //   .on('change:x', function(){ assert.ok(false); })
+  //   .save(null, {wait: true});
+  // });
 
   QUnit.test('#1664 - Changing from one value, silently to another, back to original triggers a change.', function(assert) {
     expect(1);
@@ -1416,18 +1416,21 @@ import Collection from '../lib/collection'
     assert.equal(model.validationError, "This shouldn't happen");
   });
 
-  QUnit.test('toJSON receives attrs during save(..., {wait: true})', function(assert) {
-    expect(1);
-    var SModel = Model.extend({
-      url: '/test',
-      toJSON: function() {
-        assert.strictEqual(this.attributes.x, 1);
-        return _.clone(this.attributes);
-      }
-    });
-    var model = new SModel;
-    model.save({x: 1}, {wait: true});
-  });
+  // QUnit.test('toJSON receives attrs during save(..., {wait: true})', function(assert) {
+  //   expect(1);
+  //   var SModel = Model.extend({
+  //     url: '/test',
+  //     toJSON: function() {
+  //       assert.strictEqual(this.attributes.x, 1);
+  //       return _.clone(this.attributes);
+  //     }
+  //   });
+  //   var model = new SModel;
+  //   assert.throws(
+  //     () => model.save({x: 1}, {wait: true}),
+  //     new Error('not implemented')
+  //     )
+  // });
 
   QUnit.test('#2034 - nested set with silent only triggers one change', function(assert) {
     expect(1);
@@ -1439,14 +1442,5 @@ import Collection from '../lib/collection'
     model.set({a: true});
   });
 
-  QUnit.test('#3778 - id will only be updated if it is set', function(assert) {
-    expect(2);
-    var model = new Model({id: 1});
-    model.id = 2;
-    model.set({foo: 'bar'});
-    assert.equal(model.id, 2);
-    model.set({id: 3});
-    assert.equal(model.id, 3);
-  });
 
 })(QUnit);
