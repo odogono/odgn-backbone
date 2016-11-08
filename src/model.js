@@ -1,5 +1,5 @@
 import _ from 'underscore';
-import Events from './events';
+import {Events} from './events';
 import {addUnderscoreMethods, extend as BackboneExtend, wrapError} from './utils';
 
 // Backbone.Model
@@ -12,7 +12,7 @@ import {addUnderscoreMethods, extend as BackboneExtend, wrapError} from './utils
 
 // Create a new model with the specified attributes. A client id (`cid`)
 // is automatically generated and assigned for you.
-var Model = function(attributes, options) {
+export var Model = function(attributes, options) {
   var attrs = attributes || {};
   options || (options = {});
   this.preinitialize.apply(this, arguments);
@@ -370,5 +370,3 @@ var modelMethods = {keys: 1, values: 1, pairs: 1, invert: 1, pick: 0,
 
 // Mix in each Underscore method as a proxy to `Model#attributes`.
 addUnderscoreMethods(Model, modelMethods, 'attributes');
-
-export default Model;

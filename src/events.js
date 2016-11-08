@@ -14,7 +14,7 @@ import _ from 'underscore';
 //     object.trigger('expand');
 //
 // var Events = Backbone.Events = {};
-const Events = {};
+export const Events = {};
 
 // Regular expression used to split event strings.
 var eventSplitter = /\s+/;

@@ -1,6 +1,6 @@
 import _ from 'underscore';
-import Events from './events';
-import Model from './model';
+import {Events} from './events';
+import {Model} from './model';
 import {addUnderscoreMethods, extend as BackboneExtend} from './utils';
 
 // Create a local reference to a common array method we'll want to use later.
@@ -19,7 +19,7 @@ const slice = Array.prototype.slice;
 // Create a new **Collection**, perhaps to contain a specific type of `model`.
 // If a `comparator` is specified, the Collection will maintain
 // its models in sort order, as they're added and removed.
-var Collection = function(models, options) {
+export var Collection = function(models, options) {
   options || (options = {});
   this.preinitialize.apply(this, arguments);
   if (options.model) this.model = options.model;
